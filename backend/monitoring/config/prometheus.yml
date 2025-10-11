@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s # 타겟 메트릭 수집 주기
+  evaluation_interval: 15s # 기록된 메트릭 기반 규칙(알람/레코딩 규칙) 평가 주기
+
+scrape_configs:
+  # Spring App 메트릭
+  - job_name: "server"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      # 호스트 머신 이름 활용
+      # ubuntu에서는 host.docker.internal을 활용 못하고, private IP를 적어줘야 한다고 함
+      - targets: ["host.docker.internal:8080"] # EC2에서 배포시 Private IP 로 변경 필요
+  # EC2 메트릭
+  - job_name: "node"
+    static_configs:
+      # docker network 이용
+      - targets: ["node_exporter:9100"] # EC2에서 배포시 Private IP 로 변경 필요

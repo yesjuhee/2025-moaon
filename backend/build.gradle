@@ -70,6 +70,10 @@ dependencies {
     implementation 'org.flywaydb:flyway-mysql'
 
     testImplementation 'net.datafaker:datafaker:2.1.0'
+
+    // metrics
+    implementation 'org.springframework.boot:spring-boot-starter-actuator' // 모니터링 지표와 상태 확인용 엔드포인트 제공
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus' // 메트릭을 프로메테우스 형식으로 변환해 노출
 }
 
 clean {

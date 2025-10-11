@@ -1,0 +1,42 @@
+services:
+  node_exporter:
+    image: prom/node-exporter:latest # 하드웨어 및 커널 관련 메트릭 expose
+    container_name: node_exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - --path.rootfs=/host # 컨테이너가 아닌 호스트의 메트릭을 수집
+    volumes:
+      - /:/host:ro,rslave # 호스트의 루트 파일 시스템을 컨테이너의 /host에 읽기 전용으로 마운트
+
+  prometheus:
+    image: prom/prometheus:latest # 메트릭을 수집/관리/검색할 수 있는 기능을 제공하는 서비스 모니터링 시스템
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config:/etc/prometheus #Prometheus 설정 파일(prometheus.yml)을 호스트에서 관리
+      - prometheus-data:/prometheus #Prometheus 시계열 데이터(TSDB)를 영구 보관
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml" #Prometheus가 사용할 설정 파일 경로 지정
+      - "--storage.tsdb.path=/prometheus" #Prometheus의 시계열 데이터(Time Series Data)를 저장할 디렉토리 경로 지정
+      - "--web.enable-lifecycle" #Prometheus 웹 인터페이스에서 재시작, 설정 reload 등 일부 관리 기능을 활성화
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=1234
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana # 컨테이너를 지워도 대시보드 설정이 유지
+
+volumes:
+  prometheus-data:
+  grafana-data:
